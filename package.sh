@@ -192,10 +192,16 @@ else
 fi
 
 cp -R plugins/* newscoop/plugins/
-cp -R dependencies/include/* newscoop/include/
 
 if [ $? -ne 0 ]; then
     echo "Copying plugins failed"
+    exit
+fi
+
+cp -R dependencies/include/* newscoop/include/
+
+if [ $? -ne 0 ]; then
+    echo "Copying dependencies failed"
     exit
 fi
 
