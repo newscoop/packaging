@@ -50,14 +50,17 @@ exit_usage() {
     echo -e "      Defines which GIT BRANCH should be packaged"
     echo -e "   -t GIT_TAG"
     echo -e "      Defines which GIT TAG should be packaged"
+    echo -e ""
+    echo -e "If none is specified it defaults to BRANCH [master]"
+    echo -e ""
+    echo -e "Advanced settings:"
+    echo -e ""
     echo -e "   -r REPO"
     echo -e "      The Repo to pull from"
     echo -e "      Defaults to $REPO"
     echo -e "   -u URL"
     echo -e "      The base URL to pull from"
     echo -e "      Defaults to $URL"
-    echo -e ""
-    echo -e "If none is specified it defaults to BRANCH [master]"
     exit 1
 }
 
@@ -76,10 +79,12 @@ while getopts ":hc:b:f:t:d:p:v:iu:r:" opt; do
         u)
             URL=$OPTARG
             echo "Pulling from URL: $URL"
+            echo ""
             ;;
         r)
             REPO=$OPTARG
             echo "Pulling from Repo: $REPO"
+            echo ""
             ;;
         i)
             INCLUDE='YES'
@@ -179,8 +184,8 @@ else
         URL=`cat $TARGET_DIR_GIT/config |grep -A2 "remote \"origin"|grep "$REPO"`
         echo "Git $METHOD specified: $COMMIT"
         echo "Git repo already cloned... checking"
-        if [ -z "$URL" ]; then
-            echo "Existing Git repo is not: $REPO"
+        if [ -z "$URL$REPO" ]; then
+            echo "Existing Git repo is not: $URL$REPO"
             exit;
         fi
         pushd $TARGET_DIR 1> /dev/null
@@ -228,8 +233,10 @@ fi
 
 if [ $INCLUDE = "YES" ]; then
     pushd newscoop/ 1> /dev/null
-    echo -e "Downloading Composer.phar"
-    php -r "eval('?>'.file_get_contents('https://getcomposer.org/installer'));" >> /dev/null
+    if [ ! -f composer.phar ]; then
+        echo -e "Downloading Composer.phar"
+        php -r "eval('?>'.file_get_contents('https://getcomposer.org/installer'));" >> /dev/null
+    fi
     echo -e "Installing vendors"
     php composer.phar install --prefer-dist -q
     php composer.phar dumpautoload
