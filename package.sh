@@ -123,6 +123,7 @@ fi
 TARGET_DIR_GIT=$TARGET_DIR
 TARGET_DIR_GIT+='/.git'
 
+# Clone the Git repo
 if [ ! -d $TARGET_DIR ]; then
     echo "Git $METHOD specified: $COMMIT"
     git clone $REPO $TARGET_DIR
@@ -139,4 +140,14 @@ else
         echo -e ""
         exit_usage
     fi
+fi
+
+# Checkout the Git repo
+pushd $TARGET_DIR 1> /dev/null
+git checkout $COMMIT
+if [ $? = 0 ]; then
+    echo "Git checkout succeeded"
+else
+    echo "Git checkout failed"
+    exit
 fi
