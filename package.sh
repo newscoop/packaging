@@ -50,13 +50,19 @@ exit_usage() {
     echo -e "      Defines which GIT BRANCH should be packaged"
     echo -e "   -t GIT_TAG"
     echo -e "      Defines which GIT TAG should be packaged"
+    echo -e "   -r REPO"
+    echo -e "      The Repo to pull from"
+    echo -e "      Defaults to $REPO"
+    echo -e "   -u URL"
+    echo -e "      The base URL to pull from"
+    echo -e "      Defaults to $URL"
     echo -e ""
     echo -e "If none is specified it defaults to BRANCH [master]"
     exit 1
 }
 
 # Loop through all the options and set the vars
-while getopts ":hc:b:f:t:d:p:v:i" opt; do
+while getopts ":hc:b:f:t:d:p:v:iu:r:" opt; do
     case $opt in
         h)
             exit_usage
@@ -66,6 +72,14 @@ while getopts ":hc:b:f:t:d:p:v:i" opt; do
             ;;
         v)
             VERSION=$OPTARG
+            ;;
+        u)
+            URL=$OPTARG
+            echo "Pulling from URL: $URL"
+            ;;
+        r)
+            REPO=$OPTARG
+            echo "Pulling from Repo: $REPO"
             ;;
         i)
             INCLUDE='YES'
@@ -192,10 +206,16 @@ else
 fi
 
 cp -R plugins/* newscoop/plugins/
-cp -R dependencies/include/* newscoop/include/
 
 if [ $? -ne 0 ]; then
     echo "Copying plugins failed"
+    exit
+fi
+
+cp -R dependencies/include/* newscoop/include/
+
+if [ $? -ne 0 ]; then
+    echo "Copying dependencies failed"
     exit
 fi
 
