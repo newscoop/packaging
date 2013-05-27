@@ -12,6 +12,7 @@ FORMAT='TAR'
 METHOD=''
 DEFAULT_COMMIT='master'
 COMMIT=''
+INCLUDE='NO'
 
 TARGET_DIR='newscoop_packaging'
 PACKAGE_NAME='newscoop-package'
@@ -36,6 +37,8 @@ exit_usage() {
     echo -e "   -d TARGET_DIR"
     echo -e "      The Git clone TARGET_DIR"
     echo -e "      Defaults to newscoop_packaging"
+    echo -e "   -i vendor include"
+    echo -e "      includes Composer and the Vendors"
     echo -e "------------------------------------------------------------"
     echo -e "Git checkout method"
     echo -e "Only one of the following can be used."
@@ -53,7 +56,7 @@ exit_usage() {
 }
 
 # Loop through all the options and set the vars
-while getopts ":hc:b:f:t:d:p:v:" opt; do
+while getopts ":hc:b:f:t:d:p:v:i" opt; do
     case $opt in
         h)
             exit_usage
@@ -63,6 +66,11 @@ while getopts ":hc:b:f:t:d:p:v:" opt; do
             ;;
         v)
             VERSION=$OPTARG
+            ;;
+        i)
+            INCLUDE='YES'
+            echo "Including Composer and vendors"
+            echo ""
             ;;
         f)
             # Check if FORMAT is either ZIP or TAR
@@ -184,6 +192,7 @@ else
 fi
 
 cp -R plugins/* newscoop/plugins/
+cp -R dependencies/include/* newscoop/include/
 
 if [ $? -ne 0 ]; then
     echo "Copying plugins failed"
@@ -195,6 +204,17 @@ find newscoop/ -name .gitignore -exec rm {} \;
 if [ $? -ne 0 ]; then
     echo "Removing .gitignore files failed"
     exit
+fi
+
+if [ $INCLUDE = "YES" ]; then
+    pushd newscoop/ 1> /dev/null
+    echo -e "Downloading Composer.phar"
+    php -r "eval('?>'.file_get_contents('https://getcomposer.org/installer'));" >> /dev/null
+    echo -e "Installing vendors"
+    php composer.phar install --prefer-dist -q
+    php composer.phar dumpautoload
+    rm -r cache/*
+    popd 1> /dev/null
 fi
 
 BASENAME=$PACKAGE_NAME-$VERSION

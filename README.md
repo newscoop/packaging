@@ -22,6 +22,8 @@ Usage
    -d TARGET_DIR
       The Git clone TARGET_DIR
       Defaults to newscoop_packaging
+   -i vendor include
+      includes Composer and the Vendors
 ------------------------------------------------------------
 Git checkout method
 Only one of the following can be used.
