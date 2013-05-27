@@ -14,6 +14,8 @@ COMMIT=''
 
 TARGET_DIR='newscoop_packaging'
 PACKAGE_NAME='newscoop-package'
+DATE=`date +%Y.%m.%d`
+VERSION=$DATE
 
 exit_usage() {
     echo -e "------------------------------------------------------------"
@@ -21,6 +23,12 @@ exit_usage() {
     echo -e "Usage"
     echo -e "------------------------------------------------------------"
     echo -e "   -h shows this usage"
+    echo -e "   -p PACKAGE_NAME"
+    echo -e "      The package name"
+    echo -e "      Defaults to newscoop-package"
+    echo -e "   -v VERSION"
+    echo -e "      The package version"
+    echo -e "      Defaults to the current date ($DATE)"
     echo -e "   -f FORMAT"
     echo -e "      The output format, can be either ZIP or TAR"
     echo -e "      Defaults to TAR"
@@ -44,10 +52,16 @@ exit_usage() {
 }
 
 # Loop through all the options and set the vars
-while getopts ":hc:b:f:t:d:" opt; do
+while getopts ":hc:b:f:t:d:p:v:" opt; do
     case $opt in
         h)
             exit_usage
+            ;;
+        p)
+            PACKAGE_NAME=$OPTARG
+            ;;
+        v)
+            VERSION=$OPTARG
             ;;
         f)
             # Check if FORMAT is either ZIP or TAR
@@ -177,22 +191,24 @@ if [ $? -ne 0 ]; then
     exit
 fi
 
+BASENAME=$PACKAGE_NAME-$VERSION
+
 case $FORMAT in
     ZIP)
-        zip -9q -r ../$PACKAGE_NAME newscoop/
+        zip -9q -r ../$BASENAME.zip newscoop/
         if [ $? -ne 0 ]; then
             echo "ZIP failed"
         else
-            echo "ZIP successfully created: $PACKAGE_NAME"
+            echo "ZIP successfully created: $BASENAME.zip"
         fi
         exit
         ;;
     TAR)
-        tar -czf ../$PACKAGE_NAME.tar.gz newscoop/
+        tar -czf ../$BASENAME.tar.gz newscoop/
         if [ $? -ne 0 ]; then
             echo "TAR failed"
         else
-            echo "TAR successfully created: $PACKAGE_NAME.tar.gz"
+            echo "TAR successfully created: $BASENAME.tar.gz"
         fi
         exit
         ;;
