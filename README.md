@@ -35,12 +35,15 @@ Only one of the following can be used.
       Defines which GIT BRANCH should be packaged
    -t GIT_TAG
       Defines which GIT TAG should be packaged
-   -r REPO
-      The Repo to pull from
-      Defaults to test/Test
-   -u URL
-      The base URL to pull from
-      Defaults to http://foobar.com/
 
 If none is specified it defaults to BRANCH [master]
+
+Advanced settings:
+
+   -r REPO
+      The Repo to pull from
+      Defaults to sourcefabric/Newscoop.git
+   -u URL
+      The base URL to pull from
+      Defaults to https://github.com/
 ```
