@@ -7,12 +7,13 @@
 REPO='https://github.com/sourcefabric/Newscoop.git'
 
 # Set some defaults
-FORMAT='zip'
+FORMAT='TAR'
 METHOD=''
 DEFAULT_COMMIT='master'
 COMMIT=''
 
 TARGET_DIR='newscoop_packaging'
+PACKAGE_NAME='newscoop-package'
 
 exit_usage() {
     echo -e "------------------------------------------------------------"
@@ -22,7 +23,7 @@ exit_usage() {
     echo -e "   -h shows this usage"
     echo -e "   -f FORMAT"
     echo -e "      The output format, can be either ZIP or TAR"
-    echo -e "      Defaults to ZIP"
+    echo -e "      Defaults to TAR"
     echo -e "   -d TARGET_DIR"
     echo -e "      The Git clone TARGET_DIR"
     echo -e "      Defaults to newscoop_packaging"
@@ -115,6 +116,15 @@ while getopts ":hc:b:f:t:d:" opt; do
     esac
 done
 
+if [ $FORMAT = "ZIP" ]; then
+    zip --version >> /dev/null
+    if [ $? = 127 ]; then
+        echo -e "Package ZIP is not installed, install or use TAR"
+        echo -e ""
+        exit_usage
+    fi
+fi
+
 if [ -z $COMMIT ]; then
     COMMIT=$DEFAULT_COMMIT
     METHOD="BRANCH"
@@ -144,6 +154,7 @@ fi
 
 # Checkout the Git repo
 pushd $TARGET_DIR 1> /dev/null
+git checkout .
 git checkout $COMMIT
 if [ $? = 0 ]; then
     echo "Git checkout succeeded"
@@ -151,3 +162,38 @@ else
     echo "Git checkout failed"
     exit
 fi
+
+cp -R plugins/* newscoop/plugins/
+
+if [ $? -ne 0 ]; then
+    echo "Copying plugins failed"
+    exit
+fi
+
+find newscoop/ -name .gitignore -exec rm {} \;
+
+if [ $? -ne 0 ]; then
+    echo "Removing .gitignore files failed"
+    exit
+fi
+
+case $FORMAT in
+    ZIP)
+        zip -9q -r ../$PACKAGE_NAME newscoop/
+        if [ $? -ne 0 ]; then
+            echo "ZIP failed"
+        else
+            echo "ZIP successfully created: $PACKAGE_NAME"
+        fi
+        exit
+        ;;
+    TAR)
+        tar -czf ../$PACKAGE_NAME.tar.gz newscoop/
+        if [ $? -ne 0 ]; then
+            echo "TAR failed"
+        else
+            echo "TAR successfully created: $PACKAGE_NAME.tar.gz"
+        fi
+        exit
+        ;;
+esac
