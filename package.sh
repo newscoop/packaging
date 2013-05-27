@@ -4,7 +4,8 @@
 ## Yorick Terweijden
 
 # Defines the Git URL
-REPO='https://github.com/sourcefabric/Newscoop.git'
+URL='https://github.com/'
+REPO='sourcefabric/Newscoop.git'
 
 # Set some defaults
 FORMAT='TAR'
@@ -150,11 +151,16 @@ TARGET_DIR_GIT+='/.git'
 # Clone the Git repo
 if [ ! -d $TARGET_DIR ]; then
     echo "Git $METHOD specified: $COMMIT"
-    git clone $REPO $TARGET_DIR
+    git clone $URL$REPO $TARGET_DIR
 else
     if [ -d $TARGET_DIR_GIT ]; then
+        URL=`cat $TARGET_DIR_GIT/config |grep -A2 "remote \"origin"|grep "$REPO"`
         echo "Git $METHOD specified: $COMMIT"
         echo "Git repo already cloned... checking"
+        if [ -z "$URL" ]; then
+            echo "Existing Git repo is not: $REPO"
+            exit;
+        fi
         pushd $TARGET_DIR 1> /dev/null
         git pull origin
         popd 1> /dev/null
