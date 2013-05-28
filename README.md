@@ -46,4 +46,10 @@ Advanced settings:
    -u URL
       The base URL to pull from
       Defaults to https://github.com/
+   -n REMOTE_NAME
+      The REMOTE_NAME to pull from
+      Defaults to origin
+   -a
+      Tells the script to add a Remote Fork
+      Off by default
 ```
