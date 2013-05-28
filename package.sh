@@ -6,6 +6,7 @@
 # Defines the Git URL
 URL='https://github.com/'
 REPO='sourcefabric/Newscoop.git'
+REMOTE_NAME='origin'
 
 # Set some defaults
 FORMAT='TAR'
@@ -13,6 +14,7 @@ METHOD=''
 DEFAULT_COMMIT='master'
 COMMIT=''
 INCLUDE='NO'
+ADD_FETCH='NO'
 
 TARGET_DIR='newscoop_packaging'
 PACKAGE_NAME='newscoop-package'
@@ -61,12 +63,21 @@ exit_usage() {
     echo -e "   -u URL"
     echo -e "      The base URL to pull from"
     echo -e "      Defaults to $URL"
+    echo -e "   -n REMOTE_NAME"
+    echo -e "      The REMOTE_NAME to pull from"
+    echo -e "      Defaults to $REMOTE_NAME"
+    echo -e "   -a"
+    echo -e "      Tells the script to add a Remote Fork"
+    echo -e "      Off by default"
     exit 1
 }
 
 # Loop through all the options and set the vars
-while getopts ":hc:b:f:t:d:p:v:iu:r:" opt; do
+while getopts ":hc:b:f:t:d:p:v:iu:r:n:a" opt; do
     case $opt in
+        a)
+            ADD_FETCH='YES'
+            ;;
         h)
             exit_usage
             ;;
@@ -79,6 +90,11 @@ while getopts ":hc:b:f:t:d:p:v:iu:r:" opt; do
         u)
             URL=$OPTARG
             echo "Pulling from URL: $URL"
+            echo ""
+            ;;
+        n)
+            REMOTE_NAME=$OPTARG
+            echo "Git remote name: $REMOTE_NAME"
             echo ""
             ;;
         r)
@@ -178,18 +194,23 @@ TARGET_DIR_GIT+='/.git'
 # Clone the Git repo
 if [ ! -d $TARGET_DIR ]; then
     echo "Git $METHOD specified: $COMMIT"
-    git clone $URL$REPO $TARGET_DIR
+    git clone -o $REMOTE_NAME $URL$REPO $TARGET_DIR
 else
     if [ -d $TARGET_DIR_GIT ]; then
-        URL=`cat $TARGET_DIR_GIT/config |grep -A2 "remote \"origin"|grep "$REPO"`
+        EXISTING_CLONE_URL=`cat $TARGET_DIR_GIT/config |grep -A2 "remote \"$REMOTE_NAME"|grep "$REPO"`
         echo "Git $METHOD specified: $COMMIT"
-        echo "Git repo already cloned... checking"
-        if [ -z "$URL$REPO" ]; then
-            echo "Existing Git repo is not: $URL$REPO"
+        echo "Git repo already cloned..."
+        if [ $ADD_FETCH = "YES" ]; then
+            echo "Adding a fork"
+            pushd $TARGET_DIR 1> /dev/null
+            git remote add $REMOTE_NAME $URL$REPO
+            popd 1> /dev/null
+        elif [ -z "EXISTING_CLONE_URL" ]; then
+            echo "Existing Git repo is not: $REMOTE_NAME $URL$REPO"
             exit;
         fi
         pushd $TARGET_DIR 1> /dev/null
-        git pull origin
+        git pull $REMOTE_NAME
         popd 1> /dev/null
     else
         echo "Directory $TARGET_DIR exists, please remove or specify a different one with:"
