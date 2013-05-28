@@ -200,14 +200,16 @@ else
         EXISTING_CLONE_URL=`cat $TARGET_DIR_GIT/config |grep -A2 "remote \"$REMOTE_NAME"|grep "$REPO"`
         echo "Git $METHOD specified: $COMMIT"
         echo "Git repo already cloned..."
-        if [ $ADD_FETCH = "YES" ]; then
-            echo "Adding a fork"
-            pushd $TARGET_DIR 1> /dev/null
-            git remote add $REMOTE_NAME $URL$REPO
-            popd 1> /dev/null
-        elif [ -z "EXISTING_CLONE_URL" ]; then
-            echo "Existing Git repo is not: $REMOTE_NAME $URL$REPO"
-            exit;
+        if [ -z "EXISTING_CLONE_URL" ]; then
+            if [ $ADD_FETCH = "YES" ]; then
+                echo "Adding a fork"
+                pushd $TARGET_DIR 1> /dev/null
+                git remote add $REMOTE_NAME $URL$REPO
+                popd 1> /dev/null
+            else
+                echo "Existing Git repo is not: $REMOTE_NAME $URL$REPO"
+                exit;
+            fi
         fi
         pushd $TARGET_DIR 1> /dev/null
         git pull $REMOTE_NAME
