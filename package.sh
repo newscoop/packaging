@@ -261,7 +261,7 @@ if [ $INCLUDE = "YES" ]; then
         php -r "eval('?>'.file_get_contents('https://getcomposer.org/installer'));" >> /dev/null
     fi
     echo -e "Installing vendors"
-    php composer.phar install --prefer-dist
+    php composer.phar install --prefer-dist --no-dev
     php composer.phar dumpautoload
     rm -r cache/*
     popd 1> /dev/null
