@@ -224,6 +224,7 @@ fi
 
 # Checkout the Git repo
 pushd $TARGET_DIR 1> /dev/null
+git clean -xfd
 git checkout .
 git checkout $COMMIT
 if [ $? = 0 ]; then
