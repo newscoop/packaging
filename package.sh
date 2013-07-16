@@ -226,7 +226,12 @@ fi
 pushd $TARGET_DIR 1> /dev/null
 git clean -xfd
 git checkout .
-git checkout $COMMIT
+if [ $METHOD == "BRANCH" ]; then
+    git checkout $REMOTE_NAME/$COMMIT
+else
+    git checkout $COMMIT
+fi
+
 if [ $? = 0 ]; then
     echo "Git checkout succeeded"
 else
